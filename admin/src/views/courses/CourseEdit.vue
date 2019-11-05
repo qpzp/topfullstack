@@ -4,6 +4,7 @@
     <ele-form
       :form-data="data"
       :form-desc="fields"
+      :request-fn="submit"
     >
 
     </ele-form>
@@ -30,12 +31,21 @@
     }
 
     async fetch() {
-      const res = await this.$http.get('courses',);
+      const res = await this.$http.get(`courses/${this.id}`);
       this.data = res.data;
     }
 
+    async submit(data) {
+      const url = this.isNew ? `courses` : `courses/${this.id}`;
+      const method = this.isNew ? 'post' : 'put';
+      await this.$http[method](url, data);
+      this.$message.success('保存成功');
+      this.data = {};
+      this.$router.go(-1);
+    }
+
     created() {
-      // this.fetch();
+      !this.isNew && this.fetch();
     }
   }
 </script>
