@@ -2,11 +2,13 @@
   <div>
     <avue-crud
       v-if="option.column"
+      :page="page"
       :data="data.data"
       :option="option"
       @row-save="create"
       @row-update="update"
       @row-del="remove"
+      @on-load="changePage"
     ></avue-crud>
   </div>
 </template>
@@ -20,17 +22,39 @@
   export default class ResourceList extends Vue {
     @Prop(String) resource: string;
 
-    data = {};
+    data: any = {};
 
-    option = {};
+    option: any = {};
+
+    page: any = {
+      total: 0,
+      // pageSize: 2,
+      // pageSizes: [2, 5, 10]
+    };
+
+    query: any = {
+      "limit": 2,
+    };
 
     async fetchOption() {
       const res = await this.$http.get(`${this.resource}/option`);
       this.option = res.data;
     }
 
+    async changePage({pageSize, currentPage}) {
+      this.query.page = currentPage;
+      this.query.limit = pageSize;
+      this.fetch();
+    }
+
     async fetch() {
-      const res = await this.$http.get(`${this.resource}`);
+      const res = await this.$http.get(`${this.resource}`, {
+          params: {
+            query: this.query,
+          }
+        })
+      ;
+      this.page.total = res.data.total;
       this.data = res.data;
     }
 
